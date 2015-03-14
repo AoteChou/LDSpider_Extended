@@ -40,7 +40,7 @@ public class BreadthFirstQueue extends RedirectsFavouringSpiderQueue {
 	int _maxuris;
 
 	/**
-	 * Maxplds means keep only the max number of plds with the largest amount of
+	 * Maxplds means keep only the max number of plds(pay-level-domain?) with the largest amount of
 	 * uris.
 	 */
 	int _maxplds;

@@ -1,8 +1,15 @@
 package com.ontologycentral.ldspider.frontier;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -19,6 +26,21 @@ public class BasicFrontier extends Frontier {
 		u = process(u);
 		if (u != null) {
 			_data.add(u);
+			//added to record urls added
+			try {
+				OutputStream _out = new FileOutputStream("FrontierQueue", true);
+				_out.write((new Date()+"  new URL:  "+u.toString()+"\n\n").getBytes("utf-8"));
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			//end
 		}
 	}
 	

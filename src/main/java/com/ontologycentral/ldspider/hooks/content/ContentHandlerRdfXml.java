@@ -34,7 +34,8 @@ public class ContentHandlerRdfXml implements ContentHandler {
 
 	public boolean handle(URI uri, String mime, InputStream source, Callback callback) {
 		try {
-			RDFXMLParser r = new RDFXMLParser(source, true, true, uri.toString(), callback, new Resource(NxUtil.escapeForNx(uri.toString())));
+//			RDFXMLParser r =
+					new RDFXMLParser(source, true, true, uri.toString(), callback, new Resource(NxUtil.escapeForNx(uri.toString())));
 //			RDFXMLParser r = new RDFXMLParser(source, true, false, uri.toString());
 //			while (r.hasNext()) {
 //				Node[] nx = r.next();

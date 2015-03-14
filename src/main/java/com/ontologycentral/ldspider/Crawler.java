@@ -242,7 +242,8 @@ public class Crawler {
 						minActPlds, minActPldsAlready4Seedlist);
 		} else {
 			Seen tempseen = _queue.getSeen();
-			_queue = new BreadthFirstQueue(_tldm, r, seen, maxuris, maxplds, minActPlds, minActPldsAlready4Seedlist);
+			_queue = new BreadthFirstQueue(_tldm, r, seen, maxuris, maxplds,
+					minActPlds, minActPldsAlready4Seedlist);
 			_queue.setRedirects(r);
 			_queue.setSeen(tempseen);
 		}
