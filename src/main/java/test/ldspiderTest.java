@@ -38,7 +38,8 @@ public class ldspiderTest {
 		try {
 			frontier.add(new URI(
 //					"http://localhost:8080/marmotta/resource?uri=http://dbpedia.org/resource/Lord"));
-					"http://localhost:8080/marmotta/resource?uri=http%3A%2F%2Flocalhost%2FTestResult"));
+//					"http://localhost:8080/marmotta/resource?uri=http%3A%2F%2Flocalhost%2FTestResult"));
+					"http://bio2rdf.org/interpro/describe/rdf/interpro:IPR002061"));
 //check html version on http://localhost:8080/marmotta/meta/text/html?uri=http%3A%2F%2Flocalhost%2FTestResult			
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block

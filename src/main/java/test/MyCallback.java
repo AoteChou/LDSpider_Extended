@@ -51,7 +51,8 @@ public class MyCallback implements Callback{
 		
 		
 		//if (subjID.contains("Scorpion_toxinL/defesin") || objID.contains("Scorpion_toxinL/defesin")) {
-		if (objID.contains("2015-01-01")) {
+//		if (objID.contains("2015-01-01")) {
+		if (objID.contains("defensin") || subjID.contains("defensin") ) {
 		
 			//System.out.println("Matching found!"+new Date());
 			try {

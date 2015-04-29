@@ -1,0 +1,6 @@
+Matching found!Mon Mar 16 11:11:30 GMT 2015
+http://bio2rdf.org/interpro:IPR002061  http://purl.org/dc/terms/title  Scorpion long chain toxin/defensin (Scorpion_toxinL/defensin) Family
+Matching found!Mon Mar 16 11:11:30 GMT 2015
+http://bio2rdf.org/interpro:IPR002061  http://purl.org/dc/terms/description  <p>This family contains both neurotoxins and plant defensins.  The mustard trypsin inhibitor, MTI-2, is a plant defensin. It is a potent inhibitor of trypsin with no activity towards chymotrypsin. MTI-2 is toxic for Lepidopteran insects, but has low activity against aphids [<a href="http://www.ncbi.nlm.nih.gov/pubmed/2581313">pubmed:2581313</a>].  Brazzein is a plant defensin-like protein. It is pH-stable, heat-stable and intensely sweet protein [<a href="http://www.ncbi.nlm.nih.gov/pubmed/10775411">pubmed:10775411</a>]. The scorpion toxin (a neurotoxin) binds to sodium channels and inhibits the activation mechanisms of the channels, thereby blocking neuronal transmission.</p>
+Matching found!Mon Mar 16 11:11:30 GMT 2015
+http://bio2rdf.org/interpro:IPR002061  http://www.w3.org/2000/01/rdf-schema#label  Scorpion long chain toxin/defensin (Scorpion_toxinL/defensin) Family [interpro:IPR002061]
