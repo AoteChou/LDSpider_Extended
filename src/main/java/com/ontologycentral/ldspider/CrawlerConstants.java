@@ -87,6 +87,8 @@ public class CrawlerConstants {
 	
 	public static final Set<TakingHopsIntoAccount> THOSE_WHO_TAKE_HOPS_INTO_ACCOUNT = new HashSet<TakingHopsIntoAccount>();
 	
+	//in seconds
+	public static Long URIDOUBLECHECKINTERVAL = 3600L;
 	/**
 	 * Register your Closeables here for closing them if the JVM gets shut down
 	 * (including CTRL+C'ed).

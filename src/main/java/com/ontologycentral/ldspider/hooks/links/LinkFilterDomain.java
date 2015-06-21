@@ -49,6 +49,7 @@ public class LinkFilterDomain extends LinkFilterDefault {
 			if (_hosts.contains(u.getHost())) {
 				_f.add(u);
 				_log.fine("adding " + u + " to frontier");
+//				System.out.println("adding " + u + " to frontier");
 			}
 		} catch (URISyntaxException e) {
 			_eh.handleError(null, e);

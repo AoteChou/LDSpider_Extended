@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Queue;
 import java.util.Set;
 
 public class BasicFrontier extends Frontier {
@@ -27,19 +28,27 @@ public class BasicFrontier extends Frontier {
 		if (u != null) {
 			_data.add(u);
 			//added to record urls added
-			try {
-				OutputStream _out = new FileOutputStream("FrontierQueue", true);
-				_out.write((new Date()+"  new URL:  "+u.toString()+"\n\n").getBytes("utf-8"));
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				OutputStream _out = new FileOutputStream("FrontierQueue", true);
+//				_out.write((new Date()+"  new URL:  "+u.toString()+"\n\n").getBytes("utf-8"));
+//				_out.write("____________________\n".getBytes());
+//				for (URI uri : _data) {
+//					
+//						_out.write(uri.toString().getBytes());
+//						_out.write("\n".getBytes());
+//			
+//				}
+//				_out.write("_______________\n".getBytes());
+//			} catch (FileNotFoundException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (UnsupportedEncodingException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			//end
 		}
 	}

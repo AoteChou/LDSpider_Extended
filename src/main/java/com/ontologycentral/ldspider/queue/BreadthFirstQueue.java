@@ -1,9 +1,14 @@
 package com.ontologycentral.ldspider.queue;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -187,6 +192,30 @@ public class BreadthFirstQueue extends RedirectsFavouringSpiderQueue {
 			f.reset();
 		
 		++_scheduledFrontiers;
+		//TOBEDELETE
+		OutputStream _out;
+		try {
+			_out = new FileOutputStream("Queue/q"+_scheduledFrontiers, true);
+			_out.write("____________________\n".getBytes());
+			for (String string : _current) {
+				Queue<URI> uris = _queues.get(string);
+				for (URI uri : uris) {
+					_out.write(uri.toString().getBytes());
+					_out.write("\n".getBytes());
+					
+				}
+				
+				
+			}
+			_out.write("_______________\n".getBytes());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//TOBEDELETE:END
 
 		_time = System.currentTimeMillis();
 
@@ -223,7 +252,8 @@ public class BreadthFirstQueue extends RedirectsFavouringSpiderQueue {
 
 			// randomly start from the beginning of the queue to spread out lookupt to large sites
 			if (_current.isEmpty() || (_minActPlds < 0 && (time1 - _time) > CrawlerConstants.MAX_DELAY))
-			{                       // ^^ only consider max delay if minActPLDs is disabled 
+			{                       
+				// ^^ only consider max delay if minActPLDs is disabled 
 				// queue is empty, done for this round
 				if (size() == 0) {
 					return null;
@@ -243,7 +273,7 @@ public class BreadthFirstQueue extends RedirectsFavouringSpiderQueue {
 				_time = System.currentTimeMillis();
 
 				List<String> lipld = getQueuePlds(_minActPlds < 0);
-				
+				//after all pld in the current list are polled, get all the pld for a second time
 				_current.addAll(lipld);
 				
 				if (_minActPlds > -1 && _current.size() < _minActPlds && (_minActPldsAlready4Seedlist || _scheduledFrontiers > 1)) {
