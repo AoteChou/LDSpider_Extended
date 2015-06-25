@@ -29,7 +29,9 @@ public class CrawlerConstants {
 	public static String[] BLACKLIST = { ".txt", ".html", ".xhtml", ".json", ".ttl", ".nt", ".jpg", ".pdf", ".htm", ".png", ".jpeg", ".gif" };
 
 	public static String[] SITES_NO_RDF = { "wikipedia.org", "wikimedia.org", "slideshare.net", "imdb.com", "twimg.com", "dblp.uni-trier.de", "flickr.com", "amazon.com", "last.fm" };
-
+	//CHANGE
+	public static String[] SITES_USELESS = { "dbpedia.org" };
+	//CHANGE END
 	public static String[] SITES_SLOW = { "l3s.de", "semantictweet.com", "kaufkauf.net", "rpi.edu", "uniprot.org", "geonames.org", "dbtune" };
 	public static final int SLOW_DIV = 20;
 

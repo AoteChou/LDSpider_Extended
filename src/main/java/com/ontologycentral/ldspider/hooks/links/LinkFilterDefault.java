@@ -115,6 +115,17 @@ public class LinkFilterDefault implements LinkFilter {
 						add = false;
 					}
 				}
+				//CHANGE
+				// @@@ HACK to throw out useless sites early
+				if(add){
+					
+					for (String s : CrawlerConstants.SITES_USELESS) {
+						if (u.getHost() != null && u.getHost().contains(s)) {
+							add = false;
+						}
+					}
+				}
+				//CHANGE END
 				if (add) {
 					_f.add(u);
 					// saves normalisations:
