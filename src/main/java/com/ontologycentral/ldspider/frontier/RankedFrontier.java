@@ -23,6 +23,7 @@ public class RankedFrontier extends Frontier {
 	// all hops. Maybe a different implementation could save RAM.
 	Map<String, Integer> _data;
 	Set<URI> _unscheduledUris;
+	Set<String> _domainVisited;
 
 	Object lock = new Object();
 	
@@ -30,6 +31,7 @@ public class RankedFrontier extends Frontier {
 		super();
 		_data = Collections.synchronizedMap(new HashMap<String, Integer>());
 		_unscheduledUris = Collections.synchronizedSet(new HashSet<URI>());
+		_domainVisited = Collections.synchronizedSet(new HashSet<String>());
 	}
 
 	public void add(URI u) {
@@ -38,6 +40,7 @@ public class RankedFrontier extends Frontier {
 		if (u != null) {
 			Integer count;
 			_unscheduledUris.add(u);
+			
 			synchronized(lock) {
 				count = _data.get(u.toString());
 				if (count == null) {
@@ -69,6 +72,23 @@ public class RankedFrontier extends Frontier {
 //				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //			}
+			String domain = u.getHost();
+			if(!_domainVisited.contains(domain)){
+				_domainVisited.add(domain);
+				try {
+					OutputStream _out = new FileOutputStream("FrontierQueue_Domain", true);
+					_out.write((new Date()+"  new domain:  "+domain+"\n\n").getBytes("utf-8"));
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 			_log.fine("added " + u);
 		}
 	}

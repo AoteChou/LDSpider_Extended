@@ -1,5 +1,6 @@
 package com.ontologycentral.ldspider.hooks.content;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -11,6 +12,9 @@ import org.semanticweb.yars.nx.parser.Callback;
 import org.semanticweb.yars.nx.parser.ParseException;
 import org.semanticweb.yars.nx.util.NxUtil;
 import org.semanticweb.yars2.rdfxml.RDFXMLParser;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 /**
  * Handles RDF/XML documents.
@@ -35,6 +39,10 @@ public class ContentHandlerRdfXml implements ContentHandler {
 	public boolean handle(URI uri, String mime, InputStream source, Callback callback) {
 		try {
 //			RDFXMLParser r =
+			//CHANGE:judge the relevance
+//					Model model = ModelFactory.createDefaultModel();
+//					model.read(source, uri.toString());
+//					model.write(new FileOutputStream("justGiveATry",true));
 					new RDFXMLParser(source, true, true, uri.toString(), callback, new Resource(NxUtil.escapeForNx(uri.toString())));
 //			RDFXMLParser r = new RDFXMLParser(source, true, false, uri.toString());
 //			while (r.hasNext()) {
