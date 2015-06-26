@@ -136,6 +136,22 @@ public class LookupThread extends Thread {
 					if (status == HttpStatus.SC_OK) {				
 						if (hen != null) {
 							if (_ff.fetchOk(lu, status, hen) && _contentHandler.canHandle(type)) {
+								//change: move this ahead to add redirect first, so the redirect URI can get relative corrections
+								headers = hres.getAllHeaders();
+
+								Header hloc = hres.getFirstHeader("Content-Location");
+								URI to = null;
+								if (hloc != null) {
+									to = new URI(hloc.getValue());
+									
+									// handle local redirects
+									if (!to.isAbsolute()) {
+										to = lu.resolve(hloc.getValue());
+									}
+
+									_q.setRedirect(lu, to, status);	
+								}
+								
 								InputStream is = hen.getContent();
 								Callback contentCb = _content.newDataset(new Provenance(lu, hres.getAllHeaders(), status));
 								Callbacks cbs = new Callbacks(new Callback[] { contentCb, _links, _stmtCountingCallback.reset() } );
@@ -148,22 +164,12 @@ public class LookupThread extends Thread {
 									_overall200FetchesWithRDF.incrementAndGet();
 								
 								//System.out.println("done with " + lu);
-								
-								headers = hres.getAllHeaders();
-
-								Header hloc = hres.getFirstHeader("Content-Location");
-								if (hloc != null) {
-									URI to = new URI(hloc.getValue());
-									
-									// handle local redirects
-									if (!to.isAbsolute()) {
-										to = lu.resolve(hloc.getValue());
-									}
-
-									_q.setRedirect(lu, to, status);
+								if (hloc != null && to != null) {
 									_eh.handleRedirect(lu, to, status);
 									_q.addSeen(to);
 								}
+								
+								
 							} else {
 								_log.info("disallowed via fetch filter " + lu + " type " + type);
 								_eh.handleStatus(lu, CrawlerConstants.SKIP_MIMETYPE, null, 0, -1);

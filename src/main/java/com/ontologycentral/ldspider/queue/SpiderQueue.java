@@ -3,11 +3,13 @@ package com.ontologycentral.ldspider.queue;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.semanticweb.yars.tld.TldManager;
 import org.semanticweb.yars.util.LRUMapCache;
 
+import com.aote.lodspider.corrections.Correction;
 import com.ontologycentral.ldspider.CrawlerConstants;
 import com.ontologycentral.ldspider.frontier.Frontier;
 import com.ontologycentral.ldspider.seen.Seen;

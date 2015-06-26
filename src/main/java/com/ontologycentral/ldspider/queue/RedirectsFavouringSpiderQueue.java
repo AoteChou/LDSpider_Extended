@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import org.semanticweb.yars.tld.TldManager;
 
+import com.aote.lodspider.relevance.Relevance;
 import com.ontologycentral.ldspider.seen.Seen;
 
 public abstract class RedirectsFavouringSpiderQueue extends SpiderQueue {
@@ -51,8 +52,12 @@ public abstract class RedirectsFavouringSpiderQueue extends SpiderQueue {
 
 	@Override
 	void addRedirect(URI u) {
-		if (!checkSeen(u))
+		if (!checkSeen(u)){
 			_redirectsQueue.add(u);
+			//c
+			new Relevance().setRelevance(u);
+			//cend
+		}
 	}
 
 	public int size() {
