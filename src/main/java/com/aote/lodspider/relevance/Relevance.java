@@ -59,7 +59,29 @@ public class Relevance {
 		//For corrections there are two options:
 		//1.get namespaces from source uri
 		//2.get namespaces from the result of SPARQL
-		return (Math.random())*2;
+//		return (Math.random())*2;
+		List<String> nameSpaceList_URI = getNamespaces(uri.toString());
+		List<String> nameSpaceList_Correction = getNamespaces(correction.getSourceURI().toString());
+		
+		int size_URI = nameSpaceList_URI.size();
+		int size_Correction = nameSpaceList_Correction.size();
+		int sameNum = 0;
+		
+		
+		for (int i = 0; i < size_Correction; i++) {
+			String nameSpaceItem = nameSpaceList_Correction.get(i);
+			if (nameSpaceList_URI.contains(nameSpaceItem)) {
+				sameNum ++;
+			}
+		}
+		
+		double result = 0;
+		if (size_Correction != 0) {
+			//calculate the ratio of same nameSpace In nameSpaces of URI
+			result = (double)sameNum/(double)size_URI;
+		}
+		
+		return result;
 	}
 	
 	public List<String> getNamespaces(String uri){
@@ -74,8 +96,10 @@ public class Relevance {
 //		}
 		return listNameSpaces.toList();
 	}
-	
 	public static void main(String[] args) {
+		
+		Relevance relevance = new Relevance();
+		
 		
 	}
 

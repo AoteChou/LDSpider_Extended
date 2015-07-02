@@ -1,10 +1,18 @@
 package com.aote.lodspider.corrections;
 
+import java.net.URI;
+import java.util.Date;
+
 
 public class Correction {
 //	protected Triple[] defectTriples;
 //	protected Triple[] correctionTriples;
 	public int id;
+	private Date publishedDate;
+	private URI sourceURI;
+	private String accessionPath;
+	private String oldValue;
+	private String newValue;
 	private String keyword;
 	
 	public Correction(int id, String keyword) {
@@ -33,11 +41,51 @@ public class Correction {
 			return id+":"+keyword;
 		}
 
-	private String getKeyword() {
+	public String getKeyword() {
 		return keyword;
 	}
 
-	private void setKeyword(String keyword) {
+	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public Date getPublishedDate() {
+		return publishedDate;
+	}
+
+	public void setPublishedDate(Date publishedDate) {
+		this.publishedDate = publishedDate;
+	}
+
+	public URI getSourceURI() {
+		return sourceURI;
+	}
+
+	public void setSourceURI(URI sourceURI) {
+		this.sourceURI = sourceURI;
+	}
+
+	public String getAccessionPath() {
+		return accessionPath;
+	}
+
+	public void setAccessionPath(String accessionPath) {
+		this.accessionPath = accessionPath;
+	}
+
+	public String getOldValue() {
+		return oldValue;
+	}
+
+	public void setOldValue(String oldValue) {
+		this.oldValue = oldValue;
+	}
+
+	public String getNewValue() {
+		return newValue;
+	}
+
+	public void setNewValue(String newValue) {
+		this.newValue = newValue;
 	}
 }
