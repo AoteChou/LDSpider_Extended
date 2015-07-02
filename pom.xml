@@ -53,6 +53,10 @@
 			<id>nxparser-snapshots</id>
 			<url>http://nxparser.googlecode.com/svn/snapshots</url>
 		</repository>
+		<repository> 
+    		<id>Jenabean</id> 
+    		<url>http://jenabean.googlecode.com/svn/repo</url> 
+  		</repository>
 
 	</repositories>
 

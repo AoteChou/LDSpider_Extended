@@ -1,6 +1,5 @@
 package com.ontologycentral.ldspider.hooks.content;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -13,8 +12,6 @@ import org.semanticweb.yars.nx.parser.ParseException;
 import org.semanticweb.yars.nx.util.NxUtil;
 import org.semanticweb.yars2.rdfxml.RDFXMLParser;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 /**
  * Handles RDF/XML documents.
