@@ -7,18 +7,19 @@ import java.util.Date;
 public class Correction {
 //	protected Triple[] defectTriples;
 //	protected Triple[] correctionTriples;
-	public int id;
+//	public int id;
+	private Type type;
 	private Date publishedDate;
 	private URI sourceURI;
 	private String accessionPath;
 	private String oldValue;
 	private String newValue;
-	private String keyword;
+//	private String keyword;
 	
-	public Correction(int id, String keyword) {
-		this.id = id;
-		this.keyword = keyword;
-	}
+//	public Correction(int id, String keyword) {
+//		this.id = id;
+//		this.keyword = keyword;
+//	}
 
 //	Triple[] getCorrectionTriples() {
 //		return correctionTriples;
@@ -35,19 +36,19 @@ public class Correction {
 //	void setDefectTriples(Triple[] defectTriples) {
 //		this.defectTriples = defectTriples;
 //	}
-	@Override
-		public String toString() {
-			// TODO Auto-generated method stub
-			return id+":"+keyword;
-		}
-
-	public String getKeyword() {
-		return keyword;
-	}
-
-	public void setKeyword(String keyword) {
-		this.keyword = keyword;
-	}
+//	@Override
+//		public String toString() {
+//			// TODO Auto-generated method stub
+//			return id+":"+keyword;
+//		}
+//
+//	public String getKeyword() {
+//		return keyword;
+//	}
+//
+//	public void setKeyword(String keyword) {
+//		this.keyword = keyword;
+//	}
 
 	public Date getPublishedDate() {
 		return publishedDate;
@@ -87,5 +88,13 @@ public class Correction {
 
 	public void setNewValue(String newValue) {
 		this.newValue = newValue;
+	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public void setType(Type type) {
+		this.type = type;
 	}
 }
