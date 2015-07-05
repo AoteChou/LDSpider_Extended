@@ -5,7 +5,7 @@ package com.aote.lodspider.corrections;
 public class Insertion extends Correction{
 
 	public Insertion(int id, String keyword) {
-		super(id, keyword);
+		super();
 		// TODO Auto-generated constructor stub
 	}
 //	private String entryID;

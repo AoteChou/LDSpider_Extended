@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<rdf:RDF xmlns= "http://localhost/corrections#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+
+<rdf:Description rdf:about="http://localhost/Corrections">
+  <has rdf:resource= "_1"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="#_1">
+  <type>Substitution</type>
+  <publishedDate>2015-06-13</publishedDate>
+  <sourceURI>http://purl.uniprot.org/uniprot/P37231.rdf</sourceURI>
+  <accessionPath>prefix : &lt;http://purl.uniprot.org/core/&gt;
+    SELECT ?c WHERE {
+    &lt;http://localhost:8080/marmotta/resource/#_513135383331001C8&gt;  :experiments ?c
+    }</accessionPath>
+  <oldValue>3</oldValue>
+  <newValue>4</newValue>
+</rdf:Description>
+
+
+</rdf:RDF>

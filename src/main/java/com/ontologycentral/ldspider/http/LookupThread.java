@@ -2,6 +2,9 @@ package com.ontologycentral.ldspider.http;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
@@ -13,6 +16,22 @@ import org.apache.http.client.methods.HttpGet;
 import org.semanticweb.yars.nx.parser.Callback;
 import org.semanticweb.yars.util.Callbacks;
 
+import com.aote.lodspider.callback.SearchBySPARQL;
+import com.aote.lodspider.corrections.Correction;
+import com.aote.lodspider.relevance.Relevance;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.ontologycentral.ldspider.CrawlerConstants;
 import com.ontologycentral.ldspider.hooks.content.ContentHandler;
 import com.ontologycentral.ldspider.hooks.error.ErrorHandler;
@@ -21,6 +40,7 @@ import com.ontologycentral.ldspider.hooks.sink.Provenance;
 import com.ontologycentral.ldspider.hooks.sink.Sink;
 import com.ontologycentral.ldspider.http.robot.Robots;
 import com.ontologycentral.ldspider.queue.SpiderQueue;
+import com.sun.org.apache.bcel.internal.generic.LUSHR;
 
 public class LookupThread extends Thread {
 	Logger _log = Logger.getLogger(this.getClass().getSimpleName());
@@ -152,9 +172,13 @@ public class LookupThread extends Thread {
 									_q.setRedirect(lu, to, status);	
 								}
 								
+								//C search by sparql first
+								new SearchBySPARQL().Search(lu.toString(), type);
+								//CEND
 								InputStream is = hen.getContent();
 								Callback contentCb = _content.newDataset(new Provenance(lu, hres.getAllHeaders(), status));
 								Callbacks cbs = new Callbacks(new Callback[] { contentCb, _links, _stmtCountingCallback.reset() } );
+								//TODO: maybe can do without contentCB if SPARQL find something
 								_contentHandler.handle(lu, type, is, cbs);
 								is.close();
 								
@@ -230,5 +254,7 @@ public class LookupThread extends Thread {
 	public static int getOverall200Fetches() {
 		return _overall200Fetches.get();
 	}
+	
+
 
 }

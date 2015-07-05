@@ -30,6 +30,17 @@ public interface ContentHandler {
 	 * @return True, if the document has been handled. False, if the handler could not handle the document.
 	 */
 	boolean handle(URI uri, String mime, InputStream source, Callback callback);
+
+	/**
+	 * 
+	  * @param uri The URI of the document
+	 * @param mime The MIME type of the document
+	 * @param source The input document as stream
+	 * @param callback The callback which will receive the extracted statements
+	 * @param callback2 The callback which will be invoked by this function to deal with this func
+	* @return True, if the document has been handled. False, if the handler could not handle the document.
+	 */
+//	boolean handle(URI uri, String mime, InputStream source, Callback callback, com.aote.lodspider.callback.Callback callback2);
 	
 	/**
 	 * Get MIME types supported by this ContentHandler in format
