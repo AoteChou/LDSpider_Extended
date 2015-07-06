@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+<!-- just for test -->
+	<CorrectionURI>http://localhost:8080/marmotta/export/download?context=http://localhost:8080/marmotta/context/default&amp;format=application/xml</CorrectionURI>
+</config>
