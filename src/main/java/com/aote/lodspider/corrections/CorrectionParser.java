@@ -1,7 +1,6 @@
 package com.aote.lodspider.corrections;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -13,16 +12,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -31,121 +31,136 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 
 public class CorrectionParser {
-	public static Collection<Correction> parse(){
+	public static Collection<Correction> parse() {
 		Collection<Correction> corrections = new ArrayList<Correction>();
-		try {
-			//TODO: read from config file
-			corrections = parse(new FileInputStream("Corrections/corrections"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		// TODO: read from config file
+		String uri = "http://localhost:8080/marmotta/export/download?context=http://localhost:8080/marmotta/context/default&format=application/xml";
+		InputStream in = readFromURI(uri);
+		if(in != null){	
+			corrections = parse(readFromURI(uri));
 		}
+//			corrections = parse(new FileInputStream("Corrections/corrections"));
 		return corrections;
 	}
-	
-	public static Collection<Correction> parse(InputStream source){
-		
+
+	public static Collection<Correction> parse(InputStream source) {
+
 		Model model = ModelFactory.createDefaultModel();
 		model.read(source, "");
 		StmtIterator stmtIterator = model.listStatements();
+		Map<String, Correction> correctionMap_temp = new HashMap<String, Correction>();
 		Map<String, Correction> correctionMap = new HashMap<String, Correction>();
-		while( stmtIterator.hasNext()){
+		Map<String, Integer> correction_CountMap = new HashMap<String, Integer>();
+		
+		while (stmtIterator.hasNext()) {
 			Statement nextStatement = stmtIterator.next();
 			Resource sub = nextStatement.getSubject();
 			Resource pre = nextStatement.getPredicate();
 			RDFNode obj = nextStatement.getObject();
-			
-			Correction correction = correctionMap.get(sub.toString());
-			//initiate new instance for new sub 
-			//except node "http://localhost/Corrections" which holds all corrections
-			if( correction == null && !sub.toString().equals("http://localhost/Corrections")){
+
+			Correction correction = correctionMap_temp.get(sub.toString());
+			Integer count = correction_CountMap.get(sub.toString());
+			// initiate new instance for new sub
+			// except node "http://localhost/Corrections" which holds all
+			// corrections
+			if (correction == null && count == null) {
 				correction = new Correction();
-				correctionMap.put(sub.toString(), correction);
+				count = new Integer(0);
+				correctionMap_temp.put(sub.toString(), correction);
+				correction_CountMap.put(sub.toString(), count);
 			}
 			if (pre.toString().equals("http://localhost/corrections#type")) {
 				correction.setType(Type.valueOf(obj.toString().toUpperCase()));
-				System.out.println("type:"+obj.toString());
-			}else if(pre.toString().equals("http://localhost/corrections#publishedDate")){
+				count+=1;
+				correction_CountMap.put(sub.toString(), count);
+			} else if (pre.toString().equals(
+					"http://localhost/corrections#publishedDate")) {
 				Date publishedDate;
 				try {
 					DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 					publishedDate = df.parse(obj.toString());
 					correction.setPublishedDate(publishedDate);
+					count+=1;
+					correction_CountMap.put(sub.toString(), count);
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				System.out.println("publishedDate:"+obj.toString());
-			}else if(pre.toString().equals("http://localhost/corrections#sourceURI")){
+			} else if (pre.toString().equals(
+					"http://localhost/corrections#sourceURI")) {
 				try {
 					correction.setSourceURI(new URI(obj.toString()));
+					count+=1;
+					correction_CountMap.put(sub.toString(), count);
 				} catch (URISyntaxException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				System.out.println("sourceURI:"+obj.toString());
-			}else if(pre.toString().equals("http://localhost/corrections#accessionPath")){
+			} else if (pre.toString().equals(
+					"http://localhost/corrections#accessionPath")) {
 				correction.setAccessionPath(obj.toString());
-				System.out.println("accessionPath:"+obj.toString());
-			}else if(pre.toString().equals("http://localhost/corrections#oldValue")){
+				count+=1;
+				correction_CountMap.put(sub.toString(), count);
+			} else if (pre.toString().equals(
+					"http://localhost/corrections#oldValue")) {
 				correction.setOldValue(obj.toString());
-				System.out.println("oldValue:"+obj.toString());
-			}else if(pre.toString().equals("http://localhost/corrections#newValue")){
+				count+=1;
+				correction_CountMap.put(sub.toString(), count);
+			} else if (pre.toString().equals("http://localhost/corrections#newValue")) {
 				correction.setNewValue(obj.toString());
-				System.out.println("newValue:"+obj.toString());
+				count+=1;
+				correction_CountMap.put(sub.toString(), count);
 			}
 			
+			//Check if correction has been fully set
+			if(count.equals(6)){
+				System.out.println(correction.toString());
+				correctionMap.put(sub.toString(), correction);
+			}
+
 		}
-		
+
 		return correctionMap.values();
 	}
-	
-	public void tryj(InputStream source){
-		
-		Model model = ModelFactory.createDefaultModel();
-		model.read(source, "");
-		StmtIterator stmtIterator = model.listStatements();
-		StringBuffer queryString = new StringBuffer("prefix : <http://localhost/corrections#>");
-		queryString.append("SELECT ?c WHERE {");
-		queryString.append("?p :type ?c");
-		queryString.append("}");
-		try {
-			Query query = QueryFactory.create(queryString.toString());
-			QueryExecution qexec = QueryExecutionFactory.create(query, model);
-			ResultSet rs = qexec.execSelect();
-			while(rs.hasNext()){
-				QuerySolution qs = rs.nextSolution();
-				Iterator<String> varNames = qs.varNames();
-				//TODO: now only support for one column
-				if(varNames.hasNext()){
-					RDFNode node = qs.get(varNames.next());
-					System.out.println(node.toString());
-				}
 
-			}
-			
-//			ResultSetFormatter.out(rs);
-			
-		} catch (Exception e) {
+	public static InputStream readFromURI(String uri){
+		InputStream in = null;
+		try {
+			HttpGet httpget = new HttpGet(uri);
+			// httpget.setHeaders(CrawlerConstants.HEADERS);
+			HttpContext context = new BasicHttpContext();
+			HttpResponse response;
+			response = new DefaultHttpClient().execute(httpget, context);
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+				throw new IOException(response.getStatusLine().toString());
+			// HttpUriRequest currentReq = (HttpUriRequest)
+			// context.getAttribute(
+			// ExecutionContext.HTTP_REQUEST);
+			// HttpHost currentHost = (HttpHost) context.getAttribute(
+			// ExecutionContext.HTTP_TARGET_HOST);
+			// String currentUrl = (currentReq.getURI().isAbsolute()) ?
+			// currentReq.getURI().toString() : (currentHost.toURI() +
+			// currentReq.getURI());
+//			Header ct = response.getFirstHeader("Content-Type");
+//			if (ct != null) {
+//				System.out.println(response.getFirstHeader("Content-Type")
+//						.getValue());
+//			}
+			HttpEntity httpEntity = response.getEntity();
+			in = httpEntity.getContent();
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}		
-
+		return in;
+	}
 	public static void main(String[] args) {
-		CorrectionParser c = new CorrectionParser();
-		try {
-			InputStream in = new FileInputStream("Corrections/corrections");
-//			InputStream in = new URL("http://localhost:8080/marmotta/resource?uri=http%3A%2F%2Flocalhost%2FCorrections%2F3&amp;format=application/rdf%2Bxml").openStream();
-//			c.tryj(in);
-//			CorrectionParser.parse();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}  catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+
+		CorrectionParser.parse();
+
 	}
 
 }
