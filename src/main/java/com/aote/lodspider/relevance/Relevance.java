@@ -15,6 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.apache.jena.riot.RiotException;
 import org.semanticweb.yars.nx.namespace.Namespace;
 import org.semanticweb.yars.nx.parser.NxParser;
@@ -36,7 +44,12 @@ public class Relevance {
 	private double dividingScore;
 	static{
 		_relevances = new HashMap<URI, List<Correction>>();
-		_corrections = CorrectionParser.parse();
+		try {
+			_corrections = CorrectionParser.parse();
+		} catch (Exception e) {
+			//deal with the exception when there is no corrections in triple store
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -48,16 +61,7 @@ public class Relevance {
 		this.dividingScore = dividingScore;
 	}
 	
-	public static void readCorrections(){
-//		Correction[] corrections = {new Correction(1, "defesin"),
-//				new Correction(2,"extracellular exosome"),new Correction(3,"ISS:UiProtKB"),
-//				new Correction(4,"GO_0070062"),new Correction(5,"GO:0070062")};
-		try {
-			_corrections = CorrectionParser.parse(new FileInputStream("Corrections/corrections"));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
+
 	/**
 	 * 
 	 * @param uri the resource Uri
@@ -110,12 +114,8 @@ public class Relevance {
 //		InputStream in = FileManager.get().open(uri);
 		InputStream in = null;
 		try {
-			in = new URL(uri).openStream();
+			in = readFromURI(uri);
 			model.read(in, "" );
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (RiotException e) {
 			_log.warning("[unsupported input]:"+uri);
 		}
@@ -127,6 +127,28 @@ public class Relevance {
 //		}
 		return listNameSpaces.toList();
 	}
+	
+	public static InputStream readFromURI(String uri) {
+		InputStream in = null;
+		try {
+			HttpGet httpget = new HttpGet(uri);
+			// httpget.setHeaders(CrawlerConstants.HEADERS);
+			HttpContext context = new BasicHttpContext();
+			HttpResponse response;
+			response = new DefaultHttpClient().execute(httpget, context);
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+				throw new IOException(response.getStatusLine().toString());
+			
+			HttpEntity httpEntity = response.getEntity();
+			in = httpEntity.getContent();
+		} catch (ClientProtocolException e) {
+			// e.printStackTrace();
+		} catch (IOException e) {
+			// e.printStackTrace();
+		}
+		return in;
+	}
+
 	public static void main(String[] args) {
 		
 		Relevance relevance = new Relevance();

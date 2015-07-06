@@ -35,7 +35,7 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 public class CorrectionParser {
 	public static Logger _log = Logger.getLogger("CorrectionParser");
 
-	public static Collection<Correction> parse() {
+	public static Collection<Correction> parse() throws Exception {
 		Collection<Correction> corrections = new ArrayList<Correction>();
 		// read xml config file
 		String configFilePath = "src/main/java/com/aote/lodspider/config/CrawlerConfig.xml";
@@ -47,6 +47,9 @@ public class CorrectionParser {
 			corrections = parse(readFromURI(uri));
 		}
 		// corrections = parse(new FileInputStream("Corrections/corrections"));
+		if (corrections.size() <= 0) {
+			throw new Exception("no correction in triple store!");
+		}
 		return corrections;
 	}
 
@@ -168,7 +171,12 @@ public class CorrectionParser {
 
 	public static void main(String[] args) {
 
-		CorrectionParser.parse();
+		try {
+			CorrectionParser.parse();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 

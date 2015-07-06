@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
+
+import org.apache.jena.riot.RiotException;
 
 import com.aote.lodspider.corrections.Correction;
 import com.aote.lodspider.relevance.Relevance;
@@ -30,6 +33,7 @@ import com.sun.org.apache.bcel.internal.generic.NEW;
 public class SearchBySPARQL {
 	
 	OutputStream _out;
+	public final Logger _log = Logger.getLogger(this.getClass().getName());
 	
 	public SearchBySPARQL(){
 		try {
@@ -42,14 +46,19 @@ public class SearchBySPARQL {
 	public void Search(String uri, String contentType){
 		//C
 		Model model = ModelFactory.createDefaultModel();
-		if (contentType.contains("rdf+xml")) {
-			model.read(uri.toString(), uri,"RDF/XML");
-		}else if (contentType.contains("text/plain")) {
-			model.read(uri.toString(), uri,"N-TRIPLE");
-		}else if (contentType.contains("n3")) {
-			model.read(uri.toString(), uri,"N3");
-		}else if (contentType.contains("turtle")) {
-			model.read(uri.toString(), uri,"TURTLE");
+		try {
+			if (contentType.contains("rdf+xml")) {
+				model.read(uri.toString(), uri,"RDF/XML");
+			}else if (contentType.contains("text/plain")) {
+				model.read(uri.toString(), uri,"N-TRIPLE");
+			}else if (contentType.contains("n3")) {
+				model.read(uri.toString(), uri,"N3");
+			}else if (contentType.contains("turtle")) {
+				model.read(uri.toString(), uri,"TURTLE");
+			}			
+		} catch (RiotException e) {
+			_log.warning("[cannot parse file]:"+uri);
+			return;
 		}
 		if (model == null) {
 			return;
