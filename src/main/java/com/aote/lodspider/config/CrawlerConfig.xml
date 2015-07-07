@@ -2,4 +2,5 @@
 <config>
 <!-- just for test -->
 	<CorrectionURI>http://localhost:8080/marmotta/export/download?context=http://localhost:8080/marmotta/context/default&amp;format=application/xml</CorrectionURI>
+	<relevanceThreshold>0.5</relevanceThreshold>
 </config>

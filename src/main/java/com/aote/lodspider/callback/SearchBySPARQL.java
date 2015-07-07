@@ -74,8 +74,11 @@ public class SearchBySPARQL {
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} 
 		
+		if (corrections == null) {
+			System.out.println("");
+		}
 		for (Correction correction : corrections) {
 			searchForOldvalue(model, correction, uri);
 		}

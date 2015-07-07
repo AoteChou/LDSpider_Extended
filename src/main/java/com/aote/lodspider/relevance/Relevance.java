@@ -11,10 +11,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -29,11 +31,14 @@ import org.semanticweb.yars.nx.parser.NxParser;
 
 import com.aote.lodspider.corrections.Correction;
 import com.aote.lodspider.corrections.CorrectionParser;
+import com.aote.lodspider.util.XMLParser;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NsIterator;
 import com.hp.hpl.jena.rdf.model.RDFReader;
 import com.hp.hpl.jena.util.FileManager;
+import com.ontologycentral.ldspider.CrawlerConstants;
+import com.ontologycentral.ldspider.http.ConnectionManager;
 
 public class Relevance {
 	
@@ -54,7 +59,10 @@ public class Relevance {
 	
 	
 	public Relevance(){
-		this.dividingScore = 1.0;
+		String configFilePath = "src/main/java/com/aote/lodspider/config/CrawlerConfig.xml";
+		Hashtable<String, String> configMap = XMLParser.parse(configFilePath);
+
+		this.dividingScore = Double.parseDouble(configMap.get("relevanceThreshold")); 
 		//need to change: read from doc
 	}
 	public Relevance(double dividingScore){
@@ -70,15 +78,41 @@ public class Relevance {
 		if (_relevances.get(uri) == null){
 			List<Correction> result = new ArrayList<Correction>();
 			for (Correction correction : _corrections) {
-				if( calculateRelevance(uri, correction) >= dividingScore)
+				double score = calculateRelevance(uri, correction);
+				if(  score >= dividingScore){
 //					System.out.println(calculateRelevance(uri, correction));
 					result.add(correction);
+					_log.info("add correction to[score: "+score+"] :"+ uri.toString());
+				}
 			}
 			_relevances.put(uri, result);
 			
 		}
 	}
-
+	
+//	//set relevance for URI with redirects(303)
+//	public void setRelevance(URI from, URI to){
+//		//[URI from] would have been visited but have no correction because of redirection
+//		if (_relevances.get(from).size() == 0 ){
+//			List<Correction> result = _relevances.get(to);
+//			if (result == null) {
+//				result = new ArrayList<Correction>();
+//				for (Correction correction : _corrections) {
+//					double score = calculateRelevance(to, correction);
+//					if(  score >= dividingScore){
+////					System.out.println(calculateRelevance(uri, correction));
+//						result.add(correction);
+//						_log.info("add correction to[score: "+score+"] :\n"+from+"("+to+")");
+//					}
+//				}
+//				
+//				_relevances.put(to, result);
+//			}
+//			_relevances.put(from, result);
+//			
+//		}
+//	}
+	
 	private double calculateRelevance(URI uri, Correction correction){
 		//TODO:getnamespace and calculate
 		//For corrections there are two options:
@@ -89,6 +123,9 @@ public class Relevance {
 		List<String> nameSpaceList_Correction = getNamespaces(correction.getSourceURI().toString());
 		
 		int size_URI = nameSpaceList_URI.size();
+		if (size_URI == 0) {
+			return 0;
+		}
 		int size_Correction = nameSpaceList_Correction.size();
 		int sameNum = 0;
 		
@@ -111,14 +148,11 @@ public class Relevance {
 	
 	private List<String> getNamespaces(String uri){
 		Model model = ModelFactory.createDefaultModel();
-//		InputStream in = FileManager.get().open(uri);
-		InputStream in = null;
 		try {
-			in = readFromURI(uri);
-			model.read(in, "" );
-		} catch (RiotException e) {
+			model.read(uri, uri, null);
+		} catch (Exception e) {
 			_log.warning("[unsupported input]:"+uri);
-		}
+		} 
 
 		NsIterator listNameSpaces = model.listNameSpaces();
 //		while (listNameSpaces.hasNext())
@@ -127,37 +161,17 @@ public class Relevance {
 //		}
 		return listNameSpaces.toList();
 	}
-	
-	public static InputStream readFromURI(String uri) {
-		InputStream in = null;
-		try {
-			HttpGet httpget = new HttpGet(uri);
-			// httpget.setHeaders(CrawlerConstants.HEADERS);
-			HttpContext context = new BasicHttpContext();
-			HttpResponse response;
-			response = new DefaultHttpClient().execute(httpget, context);
-			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
-				throw new IOException(response.getStatusLine().toString());
-			
-			HttpEntity httpEntity = response.getEntity();
-			in = httpEntity.getContent();
-		} catch (ClientProtocolException e) {
-			// e.printStackTrace();
-		} catch (IOException e) {
-			// e.printStackTrace();
-		}
-		return in;
-	}
 
 	public static void main(String[] args) {
 		
-		Relevance relevance = new Relevance();
-		try {
-			relevance.setRelevance(new URI("http://localhost:8080/marmotta/resource?uri=http://localhost/Corrections"));
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		Relevance relevance = new Relevance();
+//		try {
+//			relevance.setRelevance(new URI("http://localhost:8080/marmotta/resource?uri=http://localhost/Corrections"));
+//		} catch (URISyntaxException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		System.out.println(Relevance.readFromURI("http://purl.uniprot.org/uniprot/P37231"));
 		
 		
 	}

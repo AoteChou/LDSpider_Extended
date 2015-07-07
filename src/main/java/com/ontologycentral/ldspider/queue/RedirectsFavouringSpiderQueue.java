@@ -54,9 +54,7 @@ public abstract class RedirectsFavouringSpiderQueue extends SpiderQueue {
 	void addRedirect(URI u) {
 		if (!checkSeen(u)){
 			_redirectsQueue.add(u);
-			//c
-			new Relevance().setRelevance(u);
-			//cend
+			
 		}
 	}
 
