@@ -8,6 +8,9 @@ import java.util.logging.Logger;
 import org.semanticweb.yars.tld.TldManager;
 
 import com.aote.lodspider.relevance.Relevance;
+import com.aote.lodspider.relevance.Relevance_URI;
+import com.aote.lodspider.relevance.RelevanceFactory;
+import com.aote.lodspider.relevance.Relevance_Domain;
 import com.ontologycentral.ldspider.seen.Seen;
 
 public abstract class RedirectsFavouringSpiderQueue extends SpiderQueue {
@@ -31,12 +34,25 @@ public abstract class RedirectsFavouringSpiderQueue extends SpiderQueue {
 			if (u != null) {
 				if (!checkSeen(u)) {
 					_log.fine("polled " + u + " from redirects queue.");
+					// c
+					Relevance r = RelevanceFactory.getRelevance();
+					r.setRelatedCorrections(u);
+					// cend
 					return u;
 				}
 			}
 		} while (!_redirectsQueue.isEmpty());
 		
-		return pollInternal();
+		u = pollInternal();
+		if (u != null) {
+			
+			// c
+			Relevance r = RelevanceFactory.getRelevance();
+			r.setRelatedCorrections(u);
+			// cend
+		}
+		
+		return u;
 		
 //		if ((u = _redirects.poll()) != null) {
 //			_log.fine("polled " + u + " from redirects queue.");

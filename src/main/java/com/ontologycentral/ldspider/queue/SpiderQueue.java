@@ -10,7 +10,9 @@ import org.semanticweb.yars.tld.TldManager;
 import org.semanticweb.yars.util.LRUMapCache;
 
 import com.aote.lodspider.corrections.Correction;
-import com.aote.lodspider.relevance.Relevance;
+import com.aote.lodspider.relevance.Relevance_URI;
+import com.aote.lodspider.relevance.RelevanceFactory;
+import com.aote.lodspider.relevance.Relevance_Domain;
 import com.ontologycentral.ldspider.CrawlerConstants;
 import com.ontologycentral.ldspider.frontier.Frontier;
 import com.ontologycentral.ldspider.seen.Seen;
@@ -83,9 +85,10 @@ public abstract class SpiderQueue implements Serializable {
 		if (checkSeen(to) == false) {
 			_log.info("adding " + to + " directly to queue");
 			addRedirect(to);
-			// c
-			new Relevance().setRelevance(to);
-			// cend
+//			// c
+//			Relevance_Domain r = RelevanceFactory.getRelevance();
+//			r.setRelatedCorrections(to);
+//			// cend
 		}
 	}
 

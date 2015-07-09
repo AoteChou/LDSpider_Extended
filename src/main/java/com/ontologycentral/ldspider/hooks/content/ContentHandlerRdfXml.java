@@ -17,7 +17,7 @@ import org.semanticweb.yars.nx.util.NxUtil;
 import org.semanticweb.yars2.rdfxml.RDFXMLParser;
 
 import com.aote.lodspider.corrections.Correction;
-import com.aote.lodspider.relevance.Relevance;
+import com.aote.lodspider.relevance.Relevance_URI;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;

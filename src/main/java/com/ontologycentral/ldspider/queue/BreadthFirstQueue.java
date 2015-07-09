@@ -20,7 +20,9 @@ import java.util.logging.Logger;
 import org.semanticweb.yars.tld.TldManager;
 
 import com.aote.lodspider.corrections.Correction;
-import com.aote.lodspider.relevance.Relevance;
+import com.aote.lodspider.relevance.Relevance_URI;
+import com.aote.lodspider.relevance.RelevanceFactory;
+import com.aote.lodspider.relevance.Relevance_Domain;
 import com.ontologycentral.ldspider.CrawlerConstants;
 import com.ontologycentral.ldspider.frontier.DiskFrontier;
 import com.ontologycentral.ldspider.frontier.Frontier;
@@ -208,10 +210,13 @@ public class BreadthFirstQueue extends RedirectsFavouringSpiderQueue {
 			_out.write("____________________\n".getBytes());
 			for (String string : _current) {
 				Queue<URI> uris = _queues.get(string);
-				for (URI uri : uris) {
-					_out.write(uri.toString().getBytes());
-					_out.write("\n".getBytes());
-
+				if(uris != null){
+					for (URI uri : uris) {
+						_out.write(uri.toString().getBytes());
+						_out.write("\n".getBytes());
+						
+					}
+					
 				}
 
 			}
@@ -358,9 +363,10 @@ public class BreadthFirstQueue extends RedirectsFavouringSpiderQueue {
 			}
 			q.add(u);
 		}
-		// c
-		new Relevance().setRelevance(u);
-		// cend
+//		// c
+//		Relevance relevance = new Relevance();
+//		relevance.setRelatedCorrections(u);
+//		// cend
 
 	}
 

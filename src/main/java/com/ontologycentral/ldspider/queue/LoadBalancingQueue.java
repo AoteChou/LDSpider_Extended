@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 import org.semanticweb.yars.tld.TldManager;
 
-import com.aote.lodspider.relevance.Relevance;
+import com.aote.lodspider.relevance.Relevance_URI;
 import com.ontologycentral.ldspider.CrawlerConstants;
 import com.ontologycentral.ldspider.frontier.Frontier;
 import com.ontologycentral.ldspider.seen.Seen;
@@ -129,7 +129,7 @@ public class LoadBalancingQueue extends RedirectsFavouringSpiderQueue {
 			q.add(u);
 		}
 		// c
-		new Relevance().setRelevance(u);
+		new Relevance_URI().setRelatedCorrections(u);
 		// cend
 	}
 

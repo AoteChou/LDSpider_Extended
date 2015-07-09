@@ -16,6 +16,9 @@ import org.apache.jena.riot.RiotException;
 
 import com.aote.lodspider.corrections.Correction;
 import com.aote.lodspider.relevance.Relevance;
+import com.aote.lodspider.relevance.Relevance_URI;
+import com.aote.lodspider.relevance.RelevanceFactory;
+import com.aote.lodspider.relevance.Relevance_Domain;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -69,16 +72,32 @@ public class SearchBySPARQL {
 //		}
 		//find 
 		List<Correction> corrections =  new ArrayList<Correction>();
+		Relevance r = RelevanceFactory.getRelevance();
 		try {
-			corrections = Relevance._relevances.get(new URI(uri));
-		} catch (URISyntaxException e) {
+			corrections = r.getRelatedCorrections(new URI(uri));
+			while (corrections == null) {
+				System.out.println("waiting for the result: " + uri);
+				Thread.sleep(500);
+				corrections = r.getRelatedCorrections(new URI(uri));
+			}
+			System.out.println("get correction for "+ uri);
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-		
-		if (corrections == null) {
-			System.out.println("");
 		}
+		
+//		if (uri.equals("http://www.uniprot.org/uniprot/P37231.rdf")) {
+////			System.out.println(Relevance._relevances.toString());
+//			try {
+//				System.out.println(r.getRelatedCorrections(new URI(uri)));
+//			} catch (URISyntaxException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 		for (Correction correction : corrections) {
 			searchForOldvalue(model, correction, uri);
 		}
