@@ -80,7 +80,8 @@ public class Relevance_Domain extends Relevance{
 	 */
 	public synchronized void setRelatedCorrections(URI uri){
 		String domain = uri.getHost();
-		if (_relevances.get(domain) == null){
+		//if just use null to judge, would easily be affected by the useless URI
+		if (_relevances.get(domain) == null || _relevances.get(domain).size() == 0){
 			List<Correction> result = new ArrayList<Correction>();
 //			_flags.put(domain, false);
 			for (Correction correction : _corrections) {

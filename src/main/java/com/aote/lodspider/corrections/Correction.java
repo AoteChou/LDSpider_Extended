@@ -7,12 +7,19 @@ public class Correction {
 	// protected Triple[] defectTriples;
 	// protected Triple[] correctionTriples;
 	// public int id;
-	private Type type;
-	private Date publishedDate;
-	private URI sourceURI;
-	private String accessionPath;
-	private String oldValue;
-	private String newValue;
+	protected Type type;
+	protected Date publishedDate;
+	protected URI sourceURI;
+	protected String accessionPath;
+	protected String oldValue;
+	protected String newValue;
+	public Correction(){
+		type =Type.SUBSTITUTION;
+		publishedDate = new Date();
+		accessionPath = "";
+		oldValue = "";
+		newValue = "";
+	}
 
 	// private String keyword;
 

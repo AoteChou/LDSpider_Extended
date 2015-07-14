@@ -23,6 +23,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
+import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 
 import com.aote.lodspider.util.XMLParser;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -41,7 +42,7 @@ public class CorrectionParser {
 		String configFilePath = "src/main/java/com/aote/lodspider/config/CrawlerConfig.xml";
 		Hashtable<String, String> configMap = XMLParser.parse(configFilePath);
 
-		String uri = configMap.get("CorrectionURI"); 
+		String uri = configMap.get("CorrectionURI");
 		InputStream in = readFromURI(uri);
 		if (in != null) {
 			corrections = parse(readFromURI(uri));
@@ -124,7 +125,20 @@ public class CorrectionParser {
 			}
 
 			// Check if correction has been fully set
-			if (count.equals(6)) {
+			if (count.equals(getSizeByCorrectionType(correction.getType()))) {
+				switch (correction.getType()) {
+				case SUBSTITUTION:
+					correction = new Substitution(correction);
+					break;
+				case DELETION:
+					correction = new Deletion(correction);
+					break;
+				case ADDITION:
+					correction = new Addition(correction);
+					break;
+				default:
+					break;
+				}
 				System.out.println(correction.toString());
 				correctionMap.put(sub.toString(), correction);
 			}
@@ -132,6 +146,19 @@ public class CorrectionParser {
 		}
 
 		return correctionMap.values();
+	}
+
+	public static int getSizeByCorrectionType(Type type) {
+		switch (type) {
+		case SUBSTITUTION:
+			return 6;
+		case DELETION:
+			return 5;
+		case ADDITION:
+			return 5;
+		default:
+			return 6;
+		}
 	}
 
 	public static InputStream readFromURI(String uri) {

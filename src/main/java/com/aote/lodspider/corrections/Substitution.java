@@ -1,18 +1,18 @@
 package com.aote.lodspider.corrections;
 
-public class Deletion extends Correction {
 
-	public Deletion() {
+public class Substitution extends Correction {
+
+	public Substitution() {
 		super();
-		newValue = "";
-		// TODO Auto-generated constructor stub
 	}
-	public Deletion(Correction correction) {
+	public Substitution(Correction correction) {
 		type = correction.getType();
 		publishedDate = correction.getPublishedDate();
 		sourceURI = correction.getSourceURI();
 		accessionPath = correction.getAccessionPath();
 		oldValue = correction.getOldValue();
+		newValue = correction.getNewValue();
 	}
 	@Override
 	public String toString() {
@@ -22,14 +22,14 @@ public class Deletion extends Correction {
 		info += "sourceURI:" + sourceURI + "\n";
 		info += "accessionPath:" + accessionPath + "\n";
 		info += "oldValue:" + oldValue + "\n";
+		info += "newValue:" + newValue + "\n";
 		
 		return info;
 	}
-	
-//	public Deletion(String entryID, Triple[] defectTriples){
-//		this.correctionTriples = null;
-//		this.defectTriples = defectTriples;
-//
+//	Subsititution(Triple[] defectionTriples, Triple[] correctionTriples){
+//		this.defectTriples = defectionTriples;
+//		this.correctionTriples = correctionTriples;
+//		
 //	}
 
 }

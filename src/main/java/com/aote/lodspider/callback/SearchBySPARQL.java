@@ -4,21 +4,26 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import org.apache.jena.riot.RiotException;
 
 import com.aote.lodspider.corrections.Correction;
+import com.aote.lodspider.corrections.Type;
+import com.aote.lodspider.patch.PatchProducer;
 import com.aote.lodspider.relevance.Relevance;
 import com.aote.lodspider.relevance.Relevance_URI;
 import com.aote.lodspider.relevance.RelevanceFactory;
 import com.aote.lodspider.relevance.Relevance_Domain;
+import com.aote.lodspider.util.StmtOutput;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -29,8 +34,13 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.util.PrintUtil;
 import com.sun.org.apache.bcel.internal.generic.NEW;
 
 public class SearchBySPARQL {
@@ -47,6 +57,7 @@ public class SearchBySPARQL {
 	}
 	
 	public void Search(String uri, String contentType){
+		_log.info("SPARQL:"+ uri+"\n");
 		//C
 		Model model = ModelFactory.createDefaultModel();
 		try {
@@ -89,17 +100,12 @@ public class SearchBySPARQL {
 			e.printStackTrace();
 		}
 		
-//		if (uri.equals("http://www.uniprot.org/uniprot/P37231.rdf")) {
-////			System.out.println(Relevance._relevances.toString());
-//			try {
-//				System.out.println(r.getRelatedCorrections(new URI(uri)));
-//			} catch (URISyntaxException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		}
 		for (Correction correction : corrections) {
-			searchForOldvalue(model, correction, uri);
+			if (correction.getType() == Type.SUBSTITUTION) {
+				searchForOldvalue(model, correction, uri);				
+			}else{
+				searchForPosition(model, correction, uri);
+			}
 		}
 		//CEND
 	}
@@ -128,6 +134,14 @@ public class SearchBySPARQL {
 		return rs;
 	}
 	
+	public Model SPARQL_CONSTRUCT(String queryString, Model model, String baseURI){
+		Query query = QueryFactory.create(queryString, baseURI);
+		QueryExecution qexec = QueryExecutionFactory.create(query, model);
+		Model m = qexec.execConstruct();
+		
+		return m;
+	}
+	
 	/**
 	 * search for the statements that match SPARQL pattern and with oldValue
 	 * @param model_Target
@@ -135,33 +149,111 @@ public class SearchBySPARQL {
 	 */
 	public void searchForOldvalue(Model model_Target, Correction correction, String baseURI){
 		
-		ResultSet rs = SPARQL_SELECT(correction.getAccessionPath(), model_Target, baseURI);
-		while(rs.hasNext()){
-			QuerySolution qs = rs.nextSolution();
-			Iterator<String> varNames = qs.varNames();
-			//TODO: now only support for one column
-			if(varNames.hasNext()){
-				RDFNode node = qs.get(varNames.next());
-				String result = "";
+		Model m = SPARQL_CONSTRUCT(correction.getAccessionPath(), model_Target, baseURI);
+		StmtIterator stmtIterator = m.listStatements();
+		List<Statement> stmtList = stmtIterator.toList();
+		for (Statement statement : stmtList) {
+			
+			RDFNode oldvalue = statement.getObject();
+			String result = "";
+			if (oldvalue.isLiteral()) {
+				result = ((Literal)oldvalue).getLexicalForm();
+			} else if (oldvalue.isResource()) {
 				//TODO: add support for the resource
-				if (node.isLiteral()) {
-					result = ((Literal)node).getLexicalForm();
-				} else if (node.isResource()) {
-					result = ((Resource) node).getURI();
-				}
-				if (result.equals(correction.getOldValue())) {
-					//print 所在的statement
-					String info = new Date()+": find correction in "+baseURI +"\n";
-					info +="-----------------------\n";
-					info +=correction.toString();
-					info +="-----------------------\n";
-					try {
-						_out.write(info.getBytes());
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+				result = ((Resource) oldvalue).getURI();
 			}
+			if (result.equals(correction.getOldValue())) {
+				String patchFileName = "Patches/Patch"+UUID.randomUUID().toString();
+				
+				PatchProducer pp = new PatchProducer();
+				
+				//old value may be in many place
+//				Statement oldStatement = ResourceFactory.createStatement(sub.asResource(), (Property)pre.asResource(), obj);
+				StmtOutput base = new StmtOutput();
+				base.writeRDFStatements(m,statement.getSubject());
+				
+				
+				pp.appendPrefix(m.getNsPrefixMap());
+				pp.appendAdd(base.getStringBuffer().toString());
+				
+				
+				m.remove(statement);
+				m.add(statement.changeObject(correction.getNewValue()));
+				base.writeRDFStatements(m,statement.getSubject());
+				pp.appendDelete(base.getStringBuffer().toString());
+				pp.print(patchFileName);
+				
+				printInfo(baseURI, correction, patchFileName);	
+			}
+			
+		}
+//		while(rs.hasNext()){
+//			QuerySolution qs = rs.nextSolution();
+//			Iterator<String> varNames = qs.varNames();
+//			//TODO: now only support for one column
+////			ArrayList<RDFNode> nodeList = new ArrayList<RDFNode>();
+////			while(varNames.hasNext()){
+////				RDFNode node = qs.get(varNames.next());
+////				nodeList.add(node);
+////			}
+//			//TODO: check type
+//			RDFNode sub = qs.get("s");
+//			Property pre = qs.get
+//			RDFNode obj = qs.get("o");
+//			RDFNode oldvalue = qs.get("oldvalue");
+////			if (nodeList.size() < 4) {
+////				_log.warning("the length of result should be 4!");
+////				return;
+////			}
+//			String result = "";
+//			if (oldvalue.isLiteral()) {
+//				result = ((Literal)oldvalue).getLexicalForm();
+//			} else if (oldvalue.isResource()) {
+//				//TODO: add support for the resource
+//				result = ((Resource) oldvalue).getURI();
+//			}
+//			if (result.equals(correction.getOldValue())) {
+//				String patchFileName = "Patch"+new Date().toString();
+//				
+//				PatchProducer pp = new PatchProducer();
+//				
+//				
+//				//old value may be in many place
+//				Statement oldStatement = ResourceFactory.createStatement(sub.asResource(), (Property)pre.asResource(), obj);
+//				pp.appendDelete(PrintUtil.print(oldStatement));
+//				pp.appendAdd(sub.asNode().toString()+" "+pre.toString()+" "+obj.toString());
+//				pp.print();
+//				
+//				printInfo(baseURI, correction, patchFileName);	
+//			}
+//		}
+	}
+	
+	/**
+	 * search for if there is match information(position) for Addition/Deletion
+	 * @param model_Target
+	 * @param correction
+	 * @param baseURI
+	 */
+	public void searchForPosition(Model model_Target, Correction correction, String baseURI){
+		
+//		ResultSet rs = SPARQL_SELECT(correction.getAccessionPath(), model_Target, baseURI);
+//		if(rs.hasNext()){
+//			printInfo(baseURI, correction, "dd");			
+//		}
+	}
+	
+	private void printInfo(String uri, Correction correction, String patchFileName){
+		//TODO: print the whole statements
+		String info = new Date()+": find correction in "+uri +"\n";
+		info +="-----------------------\n";
+		info +=correction.toString();
+		info +="Patch: "+patchFileName+"\n";
+		info +="-----------------------\n";
+		try {
+			_out.write(info.getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
