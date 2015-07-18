@@ -27,12 +27,20 @@ public class RankedFrontier extends Frontier {
 
 	Object lock = new Object();
 	
+	OutputStream _out, _out2;
+	
 	public RankedFrontier() {
 		super();
 		_data = Collections.synchronizedMap(new HashMap<String, Integer>());
 		_unscheduledUris = Collections.synchronizedSet(new HashSet<URI>());
 		_domainVisited = Collections.synchronizedSet(new HashSet<String>());
-	}
+		try {
+			_out = new FileOutputStream("FrontierQueue");
+			_out2 = new FileOutputStream("FrontierQueue_Domain");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+ 	}
 
 	public void add(URI u) {
 		u = process(u);
@@ -50,34 +58,33 @@ public class RankedFrontier extends Frontier {
 				}
 				_data.put(u.toString(), count);
 			}
-//			try {
-//				OutputStream _out = new FileOutputStream("FrontierQueue", true);
-//				_out.write((new Date()+"  new URL:  "+u.toString()+"\n\n").getBytes("utf-8"));
-//				_out.write("____________________\n".getBytes());
-//				for (URI uri : _unscheduledUris) {
-//					
-//						_out.write(uri.toString().getBytes());
-//						_out.write(("  [Count:"+ _data.get(uri.toString())+"]").getBytes());
-//						_out.write("\n".getBytes());
-//			
-//				}
-//				_out.write("_______________\n".getBytes());
-//			} catch (FileNotFoundException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (UnsupportedEncodingException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			try {
+				
+				_out.write((new Date()+"  new URL:  "+u.toString()+"\n\n").getBytes("utf-8"));
+				_out.write("____________________\n".getBytes());
+				for (URI uri : _unscheduledUris) {
+					
+						_out.write(uri.toString().getBytes());
+						_out.write(("  [Count:"+ _data.get(uri.toString())+"]").getBytes());
+						_out.write("\n".getBytes());
+			
+				}
+				_out.write("_______________\n".getBytes());
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			String domain = u.getHost();
 			if(!_domainVisited.contains(domain)){
 				_domainVisited.add(domain);
 				try {
-					OutputStream _out = new FileOutputStream("FrontierQueue_Domain", true);
-					_out.write((new Date()+"  new domain:  "+domain+"\n\n").getBytes("utf-8"));
+					_out2.write((new Date()+"  new domain:  "+domain+"\n\n").getBytes("utf-8"));
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -94,7 +101,7 @@ public class RankedFrontier extends Frontier {
 	}
 
 	public void remove(URI u) {
-		_data.remove(u);
+		_data.remove(u.toString());
 		_unscheduledUris.remove(u);
 	}
 
@@ -118,10 +125,14 @@ public class RankedFrontier extends Frontier {
 			}
 
 			public void remove() {
-				_data.remove(currentUri);
+				_data.remove(currentUri.toString());
 				_unscheduledUris.remove(currentUri);
 			}
 		};
+	}
+	
+	public void clearCount(URI uri){
+		_data.remove(uri);
 	}
 
 	public void removeAll(Collection<URI> c) {

@@ -92,7 +92,7 @@ public class CorrectionParser {
 					publishedDate = df.parse(obj.toString());
 					correction.setPublishedDate(publishedDate);
 					count += 1;
-					correction_CountMap.put(sub.toString(), count);
+					correction_CountMap.put(sub.toString().replace("\\", ""), count);
 				} catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -109,17 +109,17 @@ public class CorrectionParser {
 				}
 			} else if (pre.toString().equals(
 					"http://localhost/corrections#accessionPath")) {
-				correction.setAccessionPath(obj.toString());
+				correction.setAccessionPath(obj.toString().replace("\\", ""));
 				count += 1;
 				correction_CountMap.put(sub.toString(), count);
 			} else if (pre.toString().equals(
 					"http://localhost/corrections#oldValue")) {
-				correction.setOldValue(obj.toString());
+				correction.setOldValue(obj.toString().replace("\\", ""));
 				count += 1;
 				correction_CountMap.put(sub.toString(), count);
 			} else if (pre.toString().equals(
 					"http://localhost/corrections#newValue")) {
-				correction.setNewValue(obj.toString());
+				correction.setNewValue(obj.toString().replace("\\", ""));
 				count += 1;
 				correction_CountMap.put(sub.toString(), count);
 			}

@@ -23,7 +23,7 @@ import com.aote.lodspider.relevance.Relevance;
 import com.aote.lodspider.relevance.Relevance_URI;
 import com.aote.lodspider.relevance.RelevanceFactory;
 import com.aote.lodspider.relevance.Relevance_Domain;
-import com.aote.lodspider.util.StmtOutput;
+import com.aote.lodspider.util.StmtRDFXMLOutput;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -103,8 +103,10 @@ public class SearchBySPARQL {
 		for (Correction correction : corrections) {
 			if (correction.getType() == Type.SUBSTITUTION) {
 				searchForOldvalue(model, correction, uri);				
-			}else{
-				searchForPosition(model, correction, uri);
+			}else if (correction.getType() == Type.ADDITION) {
+				searchForAddition(model, correction, uri);				
+			}else if (correction.getType() == Type.DELETION) {
+				searchForDeletion(model, correction, uri);
 			}
 		}
 		//CEND
@@ -168,19 +170,17 @@ public class SearchBySPARQL {
 				PatchProducer pp = new PatchProducer();
 				
 				//old value may be in many place
-//				Statement oldStatement = ResourceFactory.createStatement(sub.asResource(), (Property)pre.asResource(), obj);
-				StmtOutput base = new StmtOutput();
-				base.writeRDFStatements(m,statement.getSubject());
-				
+				StmtRDFXMLOutput base = new StmtRDFXMLOutput();
+				base.writeRDFStatements(m,statement);
 				
 				pp.appendPrefix(m.getNsPrefixMap());
-				pp.appendAdd(base.getStringBuffer().toString());
+				pp.appendAdd(base.getResult());
 				
 				
 				m.remove(statement);
 				m.add(statement.changeObject(correction.getNewValue()));
-				base.writeRDFStatements(m,statement.getSubject());
-				pp.appendDelete(base.getStringBuffer().toString());
+				base.writeRDFStatements(m,statement);
+				pp.appendDelete(base.getResult());
 				pp.print(patchFileName);
 				
 				printInfo(baseURI, correction, patchFileName);	
@@ -230,17 +230,77 @@ public class SearchBySPARQL {
 	}
 	
 	/**
-	 * search for if there is match information(position) for Addition/Deletion
+	 * search for if there is match information(position) for Deletion
 	 * @param model_Target
 	 * @param correction
 	 * @param baseURI
 	 */
-	public void searchForPosition(Model model_Target, Correction correction, String baseURI){
+	public void searchForDeletion(Model model_Target, Correction correction, String baseURI){
 		
-//		ResultSet rs = SPARQL_SELECT(correction.getAccessionPath(), model_Target, baseURI);
-//		if(rs.hasNext()){
-//			printInfo(baseURI, correction, "dd");			
-//		}
+		Model m = SPARQL_CONSTRUCT(correction.getAccessionPath(), model_Target, baseURI);
+		StmtIterator stmtIterator = m.listStatements();
+		List<Statement> stmtList = stmtIterator.toList();
+		for (Statement statement : stmtList) {		
+			RDFNode oldvalue = statement.getObject();
+			
+			String result = "";
+			if (oldvalue.isLiteral()) {
+				result = ((Literal)oldvalue).getLexicalForm();
+			} else if (oldvalue.isResource()) {
+				//TODO: add support for the resource
+				result = ((Resource) oldvalue).getURI();
+			}
+			
+			if (result.equals(correction.getOldValue())) {
+				String patchFileName = "Patches/Patch"+UUID.randomUUID().toString();
+				
+				PatchProducer pp = new PatchProducer();
+				
+				StmtRDFXMLOutput o = new StmtRDFXMLOutput();
+				o.writeRDFStatements(m,statement);
+				
+				pp.appendPrefix(m.getNsPrefixMap());
+				pp.appendDelete(o.getResult());
+				pp.print(patchFileName);
+				
+				printInfo(baseURI, correction, patchFileName);
+			}
+			
+		}
+	}
+	
+	/**
+	 * search for if there is match information(position) for Addition
+	 * @param model_Target
+	 * @param correction
+	 * @param baseURI
+	 */
+	public void searchForAddition(Model model_Target, Correction correction, String baseURI){
+		
+		ResultSet rs = SPARQL_SELECT(correction.getAccessionPath(), model_Target, baseURI);
+		while (rs.hasNext()) {
+			QuerySolution qs = rs.nextSolution();
+			Iterator<String> varNames = qs.varNames();
+			if(varNames.hasNext()){
+				String patchFileName = "Patches/Patch"+UUID.randomUUID().toString();
+
+				RDFNode subject = qs.get(varNames.next());
+
+				PatchProducer pp = new PatchProducer();
+				
+				StmtRDFXMLOutput o = new StmtRDFXMLOutput();
+				//TODO: read new value into value, for the prefix and format problem
+				o.writeRDFStatements(model_Target,subject.asResource(),correction.getNewValue());
+				
+				pp.appendPrefix(model_Target.getNsPrefixMap());
+				pp.appendAdd(o.getResult());
+				
+				pp.print(patchFileName);
+				
+				printInfo(baseURI, correction, patchFileName);
+			}
+			
+		}
 	}
 	
 	private void printInfo(String uri, Correction correction, String patchFileName){

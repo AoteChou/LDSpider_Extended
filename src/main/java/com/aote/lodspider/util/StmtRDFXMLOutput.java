@@ -3,6 +3,8 @@ package com.aote.lodspider.util;
 import java.io.PrintWriter;
 import java.util.Map;
 
+import javafx.stage.Stage;
+
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
@@ -18,8 +20,8 @@ import com.hp.hpl.jena.vocabulary.RDFSyntax;
 /**
  * Writes out statments in RDF/XML format
  */
-public class StmtOutput {
-	public StmtOutput() {
+public class StmtRDFXMLOutput {
+	public StmtRDFXMLOutput() {
 		setStringBuffer(new StringBuffer());
 		space =" ";
 	}
@@ -66,6 +68,11 @@ public class StmtOutput {
 	// protected void writeRDFTrailer( PrintWriter writer, String base )
 	// { stringBuffer.append("\n"+ "</" + rdfEl( "RDF" ) + ">" ); }
 
+	/**
+	 * write statements in the model with specific subject
+	 * @param model
+	 * @param subject
+	 */
 	public void writeRDFStatements(Model model, Resource subject) {
 		setNs(model.getNsPrefixMap());
 		currentModel = model;
@@ -77,7 +84,30 @@ public class StmtOutput {
 			writePredicate(sIter.nextStatement());
 		writeDescriptionTrailer(subject);
 	}
-
+	
+	public void writeRDFStatements(Model model, Statement statement) {
+		setNs(model.getNsPrefixMap());
+		currentModel = model;
+		stringBuffer.setLength(0);
+		writeDescriptionHeader(statement.getSubject());
+		writePredicate(statement);
+		writeDescriptionTrailer(statement.getSubject());
+	}
+	/**
+	 * write statements in the model with specific subject
+	 * and replace predicate and object with the newValue String
+	 * @param model
+	 * @param subject
+	 */
+	public void writeRDFStatements(Model model, Resource subject, String newValue) {
+		setNs(model.getNsPrefixMap());
+		currentModel = model;
+		stringBuffer.setLength(0);
+		writeDescriptionHeader(subject);
+		stringBuffer.append(newValue);
+		writeDescriptionTrailer(subject);
+	}
+	
 	protected void writeDescriptionHeader(Resource subject) {
 		getStringBuffer().append("\n"+space + "<rdf:Description ");
 		writeResourceId(subject);
@@ -158,6 +188,11 @@ public class StmtOutput {
 		// Content.
 		getStringBuffer().append(">");
 		getStringBuffer().append(Util.substituteEntitiesInElementContent(form));
+	}
+	
+	
+	public String getResult(){
+		return stringBuffer.toString();
 	}
 
 	public StringBuffer getStringBuffer() {

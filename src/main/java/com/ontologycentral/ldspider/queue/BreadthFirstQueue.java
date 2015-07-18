@@ -136,6 +136,7 @@ public class BreadthFirstQueue extends RedirectsFavouringSpiderQueue {
 			URI u = it.next();
 			if (!checkSeen(u)) {
 				add(u, true);
+				 it.remove();
 			}
 			// it.remove();
 		}
