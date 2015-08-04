@@ -1,5 +1,6 @@
 package com.aote.lodspider.callback;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -18,12 +20,15 @@ import org.apache.jena.riot.RiotException;
 
 import com.aote.lodspider.corrections.Correction;
 import com.aote.lodspider.corrections.Type;
+import com.aote.lodspider.matching.Matching;
+import com.aote.lodspider.matching.MatchingFactory;
 import com.aote.lodspider.patch.PatchProducer;
 import com.aote.lodspider.relevance.Relevance;
 import com.aote.lodspider.relevance.Relevance_URI;
 import com.aote.lodspider.relevance.RelevanceFactory;
 import com.aote.lodspider.relevance.Relevance_Domain;
 import com.aote.lodspider.util.StmtRDFXMLOutput;
+import com.aote.lodspider.util.StmtTURTLEOutput;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -47,6 +52,7 @@ public class SearchBySPARQL {
 	
 	OutputStream _out;
 	public final Logger _log = Logger.getLogger(this.getClass().getName());
+	Matching _m;
 	
 	public SearchBySPARQL(){
 		try {
@@ -54,6 +60,7 @@ public class SearchBySPARQL {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
+		_m = MatchingFactory.getMatching();
 	}
 	
 	public void Search(String uri, String contentType){
@@ -102,8 +109,8 @@ public class SearchBySPARQL {
 		
 		for (Correction correction : corrections) {
 			if (correction.getType() == Type.SUBSTITUTION) {
-				searchForOldvalue(model, correction, uri);				
-			}else if (correction.getType() == Type.ADDITION) {
+				searchForSubstitution(model, correction, uri);				
+			}else if (correction.getType() == Type.ADDITION) { 
 				searchForAddition(model, correction, uri);				
 			}else if (correction.getType() == Type.DELETION) {
 				searchForDeletion(model, correction, uri);
@@ -149,7 +156,7 @@ public class SearchBySPARQL {
 	 * @param model_Target
 	 * @param correction
 	 */
-	public void searchForOldvalue(Model model_Target, Correction correction, String baseURI){
+	public void searchForSubstitution(Model model_Target, Correction correction, String baseURI){
 		
 		Model m = SPARQL_CONSTRUCT(correction.getAccessionPath(), model_Target, baseURI);
 		StmtIterator stmtIterator = m.listStatements();
@@ -164,23 +171,20 @@ public class SearchBySPARQL {
 				//TODO: add support for the resource
 				result = ((Resource) oldvalue).getURI();
 			}
-			if (result.equals(correction.getOldValue())) {
+			if (_m.ifmatch(result, correction.getOldValue())) {
 				String patchFileName = "Patches/Patch"+UUID.randomUUID().toString();
 				
 				PatchProducer pp = new PatchProducer();
 				
 				//old value may be in many place
-				StmtRDFXMLOutput base = new StmtRDFXMLOutput();
-				base.writeRDFStatements(m,statement);
-				
-				pp.appendPrefix(m.getNsPrefixMap());
-				pp.appendAdd(base.getResult());
+				StmtTURTLEOutput t = new StmtTURTLEOutput();
 				
 				
-				m.remove(statement);
-				m.add(statement.changeObject(correction.getNewValue()));
-				base.writeRDFStatements(m,statement);
-				pp.appendDelete(base.getResult());
+				Map<String, String> nsMap = m.getNsPrefixMap(); 
+				pp.appendPrefix( nsMap);
+				pp.appendDelete(t.getTURTLEStatements(statement,nsMap));
+				
+				pp.appendAdd(t.getTURTLEStatements(statement.changeObject(correction.getNewValue()),nsMap));
 				pp.print(patchFileName);
 				
 				printInfo(baseURI, correction, patchFileName);	
@@ -247,20 +251,22 @@ public class SearchBySPARQL {
 			if (oldvalue.isLiteral()) {
 				result = ((Literal)oldvalue).getLexicalForm();
 			} else if (oldvalue.isResource()) {
-				//TODO: add support for the resource
 				result = ((Resource) oldvalue).getURI();
 			}
 			
-			if (result.equals(correction.getOldValue())) {
+			if (_m.ifmatch(result, correction.getOldValue())) {
 				String patchFileName = "Patches/Patch"+UUID.randomUUID().toString();
 				
 				PatchProducer pp = new PatchProducer();
 				
-				StmtRDFXMLOutput o = new StmtRDFXMLOutput();
-				o.writeRDFStatements(m,statement);
+//				StmtRDFXMLOutput o = new StmtRDFXMLOutput();
+//				o.writeRDFStatements(m,statement);
 				
-				pp.appendPrefix(m.getNsPrefixMap());
-				pp.appendDelete(o.getResult());
+				StmtTURTLEOutput t = new StmtTURTLEOutput();
+				
+				Map<String, String> nsMap = m.getNsPrefixMap(); 
+				pp.appendPrefix(nsMap);
+				pp.appendDelete(t.getTURTLEStatements(statement,nsMap));
 				pp.print(patchFileName);
 				
 				printInfo(baseURI, correction, patchFileName);
@@ -305,7 +311,7 @@ public class SearchBySPARQL {
 	
 	private void printInfo(String uri, Correction correction, String patchFileName){
 		//TODO: print the whole statements
-		String info = new Date()+": find correction in "+uri +"\n";
+		String info = new Date()+": find defect in "+uri +"\n";
 		info +="-----------------------\n";
 		info +=correction.toString();
 		info +="Patch: "+patchFileName+"\n";

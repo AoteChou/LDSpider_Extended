@@ -46,11 +46,17 @@ public class LinkFilterDomain extends LinkFilterDefault {
 	protected void addUri(Node[] nx, int i) {
 		try {
 			URI u = new URI(nx[i].toString());
+			num_total_URI++;
 			if (_hosts.contains(u.getHost())) {
 				_f.add(u);
+				num_passed++;
+//				uriList.add("Passed:  "+u.toString());
 				_log.fine("adding " + u + " to frontier");
 //				System.out.println("adding " + u + " to frontier");
 			}
+//			else{
+//				uriList.add("Refused:  "+u.toString());
+//			}
 		} catch (URISyntaxException e) {
 			_eh.handleError(null, e);
 		}

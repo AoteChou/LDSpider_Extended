@@ -2,6 +2,7 @@ package com.ontologycentral.ldspider.hooks.links;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import org.semanticweb.yars.nx.Node;
@@ -29,6 +30,11 @@ public class LinkFilterDefault implements LinkFilter {
 	
 	protected boolean _followABox;
 	protected boolean _followTBox;
+	
+	protected static int num_total_URI = 0;
+	protected static int num_total_Triples = 0;
+	protected static int num_passed = 0;
+	protected static ArrayList<String> uriList = new ArrayList<String>();
 		
 	public LinkFilterDefault(Frontier f) {
 		_f = f;
@@ -58,9 +64,10 @@ public class LinkFilterDefault implements LinkFilter {
 
 	public synchronized void processStatement(Node[] nx) {
 		_log.fine("seeing " + Nodes.toN3(nx));
+		num_total_Triples++;
 		for (int i = 0; i < Math.min(nx.length, 3); i++) {
 			if (nx[i] instanceof Resource) {
-				addUri(nx, i);
+//				addUri(nx, i);
 				//Subject
 				if(i == 0 && _followABox) {
 					if(_followABox) addABox(nx, i);
@@ -105,6 +112,7 @@ public class LinkFilterDefault implements LinkFilter {
 	protected synchronized void addUri(Node[] nx, int i) {
 		try {
 			_log.fine("adduri " + nx[i].toString());
+			num_total_URI ++;
 			try {
 				URI u = new URI(nx[i].toString());
 
@@ -128,6 +136,8 @@ public class LinkFilterDefault implements LinkFilter {
 				//CHANGE END
 				if (add) {
 					_f.add(u);
+					num_passed++;
+//					uriList.add("Passed:  "+u.toString());
 					// saves normalisations:
 					boolean presumablyDiscardedWhileAdding = false;
 					try {
@@ -139,7 +149,10 @@ public class LinkFilterDefault implements LinkFilter {
 						_log.fine("adding " + nx[i].toString() + " to frontier");
 						_eh.handleLink(nx[nx.length - 1], nx[i]);
 					}
-				}
+				} 
+//				else{
+//					uriList.add("Refused:  "+u.toString());
+//				}
 			} catch (URISyntaxException e) {
 				if (_eh != null) {
 					try {
@@ -154,5 +167,11 @@ public class LinkFilterDefault implements LinkFilter {
 			System.err.println(e.getMessage());
 			e.printStackTrace();
 		}
+	}
+	public void printStatistics() {
+		System.out.println("TotalTriples:"+num_total_Triples+"\n TotalURI:"+num_total_URI+"\n Passed:"+num_passed+"\n Refused:"+ (num_total_URI - num_passed) );
+//		for (String string : uriList) {
+//			System.out.println(string+"\n");
+//		}
 	}
 }

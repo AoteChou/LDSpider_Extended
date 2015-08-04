@@ -116,10 +116,10 @@ public class Relevance_URI extends Relevance{
 		List<String> nameSpaceList_Correction = getNamespaces(correction.getSourceURI(),true);
 		
 		int size_URI = nameSpaceList_URI.size();
-		if (size_URI == 0) {
+		int size_Correction = nameSpaceList_Correction.size();
+		if (size_URI == 0 || size_Correction == 0) {
 			return 0;
 		}
-		int size_Correction = nameSpaceList_Correction.size();
 		int sameNum = 0;
 		
 		
@@ -133,7 +133,7 @@ public class Relevance_URI extends Relevance{
 		double result = 0;
 		if (size_Correction != 0) {
 			//calculate the ratio of same nameSpace In nameSpaces of URI
-			result = (double)sameNum/(double)size_URI;
+			result = (double)sameNum/(double)size_Correction;
 		}
 		
 		return result;
