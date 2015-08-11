@@ -38,5 +38,15 @@ public class StmtTURTLEOutput {
 		return baos.toString().replaceAll("@prefix[\\s\\S]*?>\\s*\\.", "").trim();
 	}
 	
+	public String getTURTLEStatements(Statement[] statements, Map<String, String> nsMap) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+		Model temp = ModelFactory.createDefaultModel();
+		temp.setNsPrefixes(nsMap);
+		temp.add(statements);
+		temp.write(baos, "TURTLE");
+		
+		//delete the prefix part and return the result
+		return baos.toString().replaceAll("@prefix[\\s\\S]*?>\\s*\\.", "").trim();
+	}
 
 }

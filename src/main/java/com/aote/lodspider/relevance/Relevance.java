@@ -23,7 +23,6 @@ public abstract class Relevance {
 		Hashtable<String, String> configMap = XMLParser.parse(configFilePath);
 
 		this.dividingScore = Double.parseDouble(configMap.get("relevanceThreshold")); 
-		//need to change: read from doc
 	}
 	public Relevance(double dividingScore){
 		this.dividingScore = dividingScore;

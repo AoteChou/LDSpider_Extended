@@ -52,7 +52,9 @@ public class EditDistance extends Matching {
 //			}
 			for (String text_part : text_split) {
 //				writeInfo(pattern[i], text_part);
-				if( l.similarity(pattern[i], text_part) >= getMatchVal())
+				double similarity =  l.similarity(pattern[i], text_part);
+				System.out.println(similarity+"");
+				if( similarity >= getMatchVal())
 					return true;
 			}
 	
@@ -128,14 +130,17 @@ public class EditDistance extends Matching {
 	}
 	
 	public static void main(String[] args) {
-		EditDistance ed = new EditDistance(0.9);
-		System.out.println(ed.spaceNumInaString("dd   ss sa"));
+		EditDistance ed = new EditDistance(0.5);
 		
-		String[] resultStrings = ed.split( "ds sas sa","dsds dsd ddd ddd dsa ase ds dsd");
+		System.out.println(ed.ifmatch("Scorpion", "Scorpion_toxin/defesin"));
 		
-		for (String string : resultStrings) {
-			System.out.println(string);
-		}
+//		System.out.println(ed.spaceNumInaString("dd   ss sa"));
+//		
+//		String[] resultStrings = ed.split( "ds sas sa","dsds dsd ddd ddd dsa ase ds dsd");
+//		
+//		for (String string : resultStrings) {
+//			System.out.println(string);
+//		}
 	}
 
 }

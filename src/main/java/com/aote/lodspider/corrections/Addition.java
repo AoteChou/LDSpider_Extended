@@ -1,12 +1,14 @@
 package com.aote.lodspider.corrections;
 
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+
 
 
 public class Addition extends Correction{
 
 	public Addition() {
 		super();
-		oldValue = "";
+		oldValue = ModelFactory.createDefaultModel();
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -16,6 +18,7 @@ public class Addition extends Correction{
 		sourceURI = correction.getSourceURI();
 		accessionPath = correction.getAccessionPath();
 		newValue = correction.getNewValue();
+		newValuePath = correction.getNewValuePath();
 	}
 	
 	@Override
@@ -25,7 +28,7 @@ public class Addition extends Correction{
 		info += "publishedDate:" + publishedDate + "\n";
 		info += "sourceURI:" + sourceURI + "\n";
 		info += "accessionPath:" + accessionPath + "\n";
-		info += "newValue:" + newValue + "\n";
+		info += "newValue:" + newValuePath + "\n";
 		
 		return info;
 	}

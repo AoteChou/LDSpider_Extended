@@ -4,10 +4,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -139,15 +141,19 @@ public class Relevance_URI extends Relevance{
 		return result;
 	}
 	
-	private List<String> getNamespaces(URI uri) throws URIParseException{
+	public List<String> getNamespaces(URI uri) throws URIParseException{
 		return getNamespaces(uri, false);
 	}
 	
 	private List<String> getNamespaces(URI uri, Boolean cache) throws URIParseException{
+		
 		if (!cache) {
 			Model model = ModelFactory.createDefaultModel();
 			try {
-				model.read(uri.toString(), uri.toString(), null);
+				InputStream content = dealWithURI(uri);
+				if (content != null) {
+					model.read(content, uri.toString());
+				}
 			} catch (Exception e) {
 //				_log.warning("[unsupported input]:"+uri);
 				throw new URIParseException();
@@ -162,7 +168,10 @@ public class Relevance_URI extends Relevance{
 			
 			Model model = ModelFactory.createDefaultModel();
 			try {
-				model.read(uri.toString(), uri.toString(), null);
+				InputStream content = dealWithURI(uri);
+				if (content != null) {
+					model.read(content, uri.toString());
+				}
 			} catch (Exception e) {
 //				_log.warning("[unsupported input]:"+uri);
 				throw new URIParseException();
@@ -178,16 +187,55 @@ public class Relevance_URI extends Relevance{
 		
 		return _nameSpaces.get(uri);
 	}
+	
+	/**
+	 * request for rdf/xml and return inputstream(LD-spider can read from uri but cannot deal with 303 redirect)
+	 * @param uri
+	 * @return response content
+	 * @throws URIParseException
+	 */
+	private InputStream dealWithURI(URI uri) throws URIParseException {
+		try {
+			URLConnection con = uri.toURL().openConnection();
+			con.setRequestProperty("Accept", "application/rdf+xml, application/xml");
+			con.connect();
+			// Cast to a HttpURLConnection
+			if ( con instanceof HttpURLConnection)
+			{
+			   HttpURLConnection httpCon = (HttpURLConnection) con;
+
+			   int code = httpCon.getResponseCode();
+			   if(code == HttpURLConnection.HTTP_MOVED_PERM || code == HttpURLConnection.HTTP_MOVED_TEMP || code == HttpURLConnection.HTTP_SEE_OTHER || code == HttpURLConnection.HTTP_OK){
+//				   URI redirectPath = httpCon.getURL().toURI();
+//				   return redirectPath;
+				   return httpCon.getInputStream();
+			   } 
+			   
+			}else
+			{
+			   _log.fine("error - not a http request!["+uri+"]" );
+			}
+			return null;
+		} catch (Exception e) {
+			throw new URIParseException();
+		} 
+	}
 
 	public static void main(String[] args) {
 		
 		Relevance_URI relevance = new Relevance_URI();
-//		try {
-//			relevance.setRelevance(new URI("http://localhost:8080/marmotta/resource?uri=http://localhost/Corrections"));
-//		} catch (URISyntaxException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		try {
+			List<String> namespaces = relevance.getNamespaces(new URI("http://localhost:8080/marmotta/resource?uri=http://localhost/Corrections"));
+			for (String string : namespaces) {
+				System.out.println(string);
+			}
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	catch (URIParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //		System.out.println(Relevance.readFromURI("http://purl.uniprot.org/uniprot/P37231"));
 		
 		

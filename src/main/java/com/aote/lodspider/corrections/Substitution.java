@@ -12,7 +12,9 @@ public class Substitution extends Correction {
 		sourceURI = correction.getSourceURI();
 		accessionPath = correction.getAccessionPath();
 		oldValue = correction.getOldValue();
+		oldValuePath = correction.getOldValuePath();
 		newValue = correction.getNewValue();
+		newValuePath = correction.getNewValuePath();
 	}
 	@Override
 	public String toString() {
@@ -21,8 +23,8 @@ public class Substitution extends Correction {
 		info += "publishedDate:" + publishedDate + "\n";
 		info += "sourceURI:" + sourceURI + "\n";
 		info += "accessionPath:" + accessionPath + "\n";
-		info += "oldValue:" + oldValue + "\n";
-		info += "newValue:" + newValue + "\n";
+		info += "oldValue:" + oldValuePath + "\n";
+		info += "newValue:" + newValuePath + "\n";
 		
 		return info;
 	}

@@ -1,10 +1,12 @@
 package com.aote.lodspider.corrections;
 
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+
 public class Deletion extends Correction {
 
 	public Deletion() {
 		super();
-		newValue = "";
+		newValue = ModelFactory.createDefaultModel();
 		// TODO Auto-generated constructor stub
 	}
 	public Deletion(Correction correction) {
@@ -13,6 +15,7 @@ public class Deletion extends Correction {
 		sourceURI = correction.getSourceURI();
 		accessionPath = correction.getAccessionPath();
 		oldValue = correction.getOldValue();
+		oldValuePath = correction.getOldValuePath();
 	}
 	@Override
 	public String toString() {
@@ -21,7 +24,7 @@ public class Deletion extends Correction {
 		info += "publishedDate:" + publishedDate + "\n";
 		info += "sourceURI:" + sourceURI + "\n";
 		info += "accessionPath:" + accessionPath + "\n";
-		info += "oldValue:" + oldValue + "\n";
+		info += "oldValue:" + oldValuePath + "\n";
 		
 		return info;
 	}

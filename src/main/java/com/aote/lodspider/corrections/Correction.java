@@ -3,6 +3,8 @@ package com.aote.lodspider.corrections;
 import java.net.URI;
 import java.util.Date;
 
+import com.hp.hpl.jena.rdf.model.Model;
+
 public class Correction {
 	// protected Triple[] defectTriples;
 	// protected Triple[] correctionTriples;
@@ -11,14 +13,16 @@ public class Correction {
 	protected Date publishedDate;
 	protected URI sourceURI;
 	protected String accessionPath;
-	protected String oldValue;
-	protected String newValue;
+	protected Model oldValue;
+	protected String oldValuePath;
+	protected Model newValue;
+	protected String newValuePath;
 	public Correction(){
 		type =Type.SUBSTITUTION;
 		publishedDate = new Date();
 		accessionPath = "";
-		oldValue = "";
-		newValue = "";
+		oldValuePath = "";
+		newValuePath = "";
 	}
 
 	// private String keyword;
@@ -51,8 +55,8 @@ public class Correction {
 		info += "publishedDate:" + publishedDate + "\n";
 		info += "sourceURI:" + sourceURI + "\n";
 		info += "accessionPath:" + accessionPath + "\n";
-		info += "oldValue:" + oldValue + "\n";
-		info += "newValue:" + newValue + "\n";
+		info += "oldValue:" + oldValuePath + "\n";
+		info += "newValue:" + newValuePath + "\n";
 		
 		return info;
 	}
@@ -90,19 +94,19 @@ public class Correction {
 		this.accessionPath = accessionPath;
 	}
 
-	public String getOldValue() {
+	public Model getOldValue() {
 		return oldValue;
 	}
 
-	public void setOldValue(String oldValue) {
+	public void setOldValue(Model oldValue) {
 		this.oldValue = oldValue;
 	}
 
-	public String getNewValue() {
+	public Model getNewValue() {
 		return newValue;
 	}
 
-	public void setNewValue(String newValue) {
+	public void setNewValue(Model newValue) {
 		this.newValue = newValue;
 	}
 
@@ -112,5 +116,21 @@ public class Correction {
 
 	public void setType(Type type) {
 		this.type = type;
+	}
+
+	public String getOldValuePath() {
+		return oldValuePath;
+	}
+
+	public void setOldValuePath(String oldValuePath) {
+		this.oldValuePath = oldValuePath;
+	}
+
+	public String getNewValuePath() {
+		return newValuePath;
+	}
+
+	public void setNewValuePath(String newValuePath) {
+		this.newValuePath = newValuePath;
 	}
 }

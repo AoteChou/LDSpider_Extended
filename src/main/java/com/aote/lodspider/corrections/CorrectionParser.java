@@ -1,5 +1,7 @@
 package com.aote.lodspider.corrections;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -114,12 +116,33 @@ public class CorrectionParser {
 				correction_CountMap.put(sub.toString(), count);
 			} else if (pre.toString().equals(
 					"http://localhost/corrections#oldValue")) {
-				correction.setOldValue(obj.toString().replace("\\", ""));
+//				correction.setOldValue(obj.toString().replace("\\", ""));
+				try {		
+					String path = obj.toString();
+					InputStream in = new FileInputStream(path);
+					Model oldValue = ModelFactory.createDefaultModel();
+					oldValue.read(in, "");
+					correction.setOldValue(oldValue);
+					correction.setOldValuePath(path);
+				} catch (Exception e) {
+					_log.warning("reading oldvalue error");
+					_log.warning(e.toString());
+				}
 				count += 1;
 				correction_CountMap.put(sub.toString(), count);
 			} else if (pre.toString().equals(
 					"http://localhost/corrections#newValue")) {
-				correction.setNewValue(obj.toString().replace("\\", ""));
+//				correction.setNewValue(obj.toString().replace("\\", ""));
+				try {					
+					String path = obj.toString();
+					InputStream in = new FileInputStream(path);
+					Model newValue = ModelFactory.createDefaultModel();
+					newValue.read(in, "");
+					correction.setNewValue(newValue);
+					correction.setNewValuePath(path);
+				} catch (Exception e) {
+					_log.warning("reading oldvalue error");
+				}
 				count += 1;
 				correction_CountMap.put(sub.toString(), count);
 			}
@@ -160,6 +183,28 @@ public class CorrectionParser {
 			return 6;
 		}
 	}
+	public static void parseRDFXMLIntoModel(){
+		InputStream in;
+		try {
+			in = new FileInputStream("Corrections/4_old");
+			Model model = ModelFactory.createDefaultModel();
+			model.read(in, "");
+			StmtIterator stmtIterator = model.listStatements();
+			while (stmtIterator.hasNext()) {
+				Statement statement = (Statement) stmtIterator.next();
+				String sub = statement.getSubject().toString();
+				String pre = statement.getPredicate().toString();
+				String obj = statement.getObject().toString();
+				
+				System.out.println(sub+"\n"+pre+"\n"+obj);
+				
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 
 	public static InputStream readFromURI(String uri) {
 		InputStream in = null;
@@ -199,7 +244,7 @@ public class CorrectionParser {
 	public static void main(String[] args) {
 
 		try {
-			CorrectionParser.parse();
+			CorrectionParser.parseRDFXMLIntoModel();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
