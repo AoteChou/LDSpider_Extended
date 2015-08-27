@@ -52,7 +52,7 @@ public class SearchBySPARQL {
 
 	OutputStream _out;
 	public final Logger _log = Logger.getLogger(this.getClass().getName());
-	Matching _m;
+	Matching _m, _exactM, _approachingM;
 
 	public SearchBySPARQL() {
 		try {
@@ -60,7 +60,8 @@ public class SearchBySPARQL {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		_m = MatchingFactory.getMatching();
+		_exactM = MatchingFactory.getExactMatching();
+		_approachingM = MatchingFactory.getApproachingMatching();
 	}
 
 	public void Search(String uri, String contentType) {
@@ -208,11 +209,13 @@ public class SearchBySPARQL {
 				currentObjValue = ((Literal) currentObjNode).getLexicalForm();
 				oldObjValue = ((Literal) oldObjNode).getLexicalForm();
 				newObjValue = ((Literal) newObjNode).getLexicalForm();
+				_m = _approachingM;
 			} else if (currentObjNode.isResource() && oldObjNode.isResource()) {
 				// TODO: add support for the resource
 				currentObjValue = ((Resource) currentObjNode).getURI();
 				oldObjValue = ((Resource) oldObjNode).getURI();
 				newObjValue = ((Resource) newObjNode).getURI();
+				_m = _exactM;
 			} else {
 				// current and old value have different type
 				continue;
@@ -319,10 +322,12 @@ public class SearchBySPARQL {
 			if (currentObjNode.isLiteral() && oldObjNode.isLiteral()) {
 				currentObjValue = ((Literal) currentObjNode).getLexicalForm();
 				oldObjValue = ((Literal) oldObjNode).getLexicalForm();
+				_m = _approachingM;
 			} else if (currentObjNode.isResource() && oldObjNode.isResource()) {
 				// TODO: add support for the resource
 				currentObjValue = ((Resource) currentObjNode).getURI();
 				oldObjValue = ((Resource) oldObjNode).getURI();
+				_m = _exactM;
 			} else {
 				// current and old value have different type
 				continue;

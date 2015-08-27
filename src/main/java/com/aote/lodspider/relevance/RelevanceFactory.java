@@ -2,7 +2,7 @@ package com.aote.lodspider.relevance;
 
 public class RelevanceFactory {
 	private static class RelevanceHolder{
-		private static final Relevance r = new Relevance_URI();
+		private static final Relevance r = new Relevance_Domain();
 	}
 	private RelevanceFactory(){
 		
